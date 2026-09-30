@@ -1,0 +1,329 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,citecolor=blue!60!black,urlcolor=blue!60!black}
+
+\newtheorem{theorem}{Théorème}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemme}
+\newtheorem{corollary}[theorem]{Corollaire}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Définition}
+\newtheorem{example}[theorem]{Exemple}
+\newtheorem{question}{Question}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remarque}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Cc}{\mathbb{C}}
+\newcommand{\jet}[2]{j^{#1}#2}
+\newcommand{\Jet}{\mathcal{J}}
+\newcommand{\tr}{^{\top}}
+\newcommand{\sym}{\operatorname{sym}}
+\newcommand{\col}{\operatorname{col}}
+\newcommand{\co}{\operatorname{co}}
+\DeclareMathOperator{\He}{He}
+
+\title{Fonctions de Lyapunov sur les jets de trajectoires\\[2mm]
+\large Note de travail : définitions, un premier résultat converse, et programme}
+\author{V. Andrieu, Y. Ebihara, S. Tarbouriech}
+\date{\today}
+
+\begin{document}
+\maketitle
+\begin{center}\fbox{\parbox{0.92\textwidth}{\small\color{red}\textbf{Avertissement.} Cette note a été générée par Claude (Anthropic), à partir d'une question de recherche posée par V.~Andrieu et S.~Tarbouriech et au fil d'un dialogue avec eux ; Y.~Ebihara a rejoint le projet ensuite. Les énoncés, les preuves et les résultats numériques ont été relus par les auteurs mais n'ont pas encore fait l'objet d'une vérification indépendante ; les références bibliographiques sont citées de mémoire et doivent être vérifiées une par une.}}\end{center}
+\medskip
+
+\begin{abstract}
+Dans l'analyse par LMI, on utilise fréquemment des fonctions de Lyapunov quadratiques non seulement en l'état $x$ mais en $(x,\dot x)$, voire en $(x,\dot x, w, \dot w)$ dans le cadre de Lur'e. Cette note propose de formaliser ce point de vue : une fonction de Lyapunov \emph{sur les jets} est une fonction du $k$-jet $(x,\dot x,\dots,x^{(k)})$ de la trajectoire. On établit d'abord ce que ce cadre apporte (et n'apporte pas), puis on démontre un résultat converse dans le cas linéaire incertain : pour tout compact de matrices Hurwitz, il existe une forme quadratique \emph{universelle} en le $N$-jet, à coefficients indépendants du compact, qui est une fonction de Lyapunov commune. La construction s'interprète comme un coût à horizon fini appliqué au polynôme de Taylor de la trajectoire, ce qui la rend transposable au cas non linéaire analytique. On esquisse ensuite des démarches pour les questions ouvertes : multiplicateurs constants et hiérarchies LMI, paramètres à taux borné, systèmes de Lur'e à pente bornée, cas non linéaire au-delà du rayon d'analyticité.
+\end{abstract}
+
+\tableofcontents
+
+\section{Motivation et cadrage}
+
+\subsection{Le point de départ}
+Pour $\dot x = Ax + Bw$, $w=-\phi(Cx)$, les conditions LMI usuelles font intervenir un vecteur augmenté $\xi = (x,\dot x, w, \dot w)$ et une fonction $V = \xi\tr \mathcal P \xi$ (ou une forme en $(x,\dot x)$), les relations entre composantes de $\xi$ étant prises en compte par le lemme de Finsler et la S-procédure. La question est :
+\begin{quote}
+\emph{Peut-on faire une théorie des fonctions de Lyapunov définies sur les jets de trajectoires, et montrer par des résultats converses que cette approche est générale ?}
+\end{quote}
+
+\subsection{Ce que les jets apportent, et ce qu'ils n'apportent pas}
+Soit $\dot x = f(x)$, $f$ de classe $C^k$. Le $k$-jet d'une solution est une fonction de l'état :
+\begin{equation}\label{eq:Phi}
+\jet{k}{x}(t) = \big(x(t),\dot x(t),\dots,x^{(k)}(t)\big) = \Phi_k(x(t)),\qquad \Phi_k(x) := \big(x, L_f x, L_f^2 x,\dots,L_f^k x\big),
+\end{equation}
+où $L_f^i x$ désigne la $i$-ème dérivée de Lie des coordonnées. Ainsi $V(\jet{k}{x}) = (V\circ\Phi_k)(x)$ : \textbf{pour un système déterministe, les jets n'élargissent pas la classe des fonctions de Lyapunov}. Toute fonction de Lyapunov $W(x)$ est trivialement une fonction du $0$-jet, et réciproquement. La question converse n'a donc de sens que \emph{relativement à une classe} : typiquement les formes quadratiques (ou polynomiales de degré fixé) en le jet, c'est-à-dire, pour un système déterministe, la classe
+\begin{equation}\label{eq:classe}
+\mathcal Q_N(f) := \Big\{ x\mapsto \sum_{i,j\le N} (L_f^i x)\tr P_{ij}\, L_f^j x \ :\ P_{ij}\in\R^{n\times n}\Big\}.
+\end{equation}
+C'est un relèvement linéaire : $V$ est paramétrée linéairement par $\mathcal P=(P_{ij})$, alors que $V\circ\Phi_N$ est non quadratique en $x$. On est dans l'esprit des relèvements de Koopman ou Carleman ; $\{L_f^i x\}_{i\le N}$ est le sous-espace de Krylov d'ordre $N$ du générateur de Koopman appliqué aux coordonnées.
+
+Le cadre devient réellement différent dès que \textbf{l'incertitude entre en jeu} :
+\begin{itemize}[nosep]
+\item pour $\dot x = f(x,w)$ avec $w$ constant inconnu, le jet $\Phi_k(x,w)$ dépend de $w$ ; une même forme $V$ sur les jets engendre une \emph{famille} $W_w = V\circ\Phi_k(\cdot,w)$ de fonctions de Lyapunov dépendant du paramètre, avec une paramétrisation \emph{fixe} ;
+\item la \textbf{régularité temporelle} de l'incertitude devient centrale : si $w(t)$ peut sauter, $\dot x$ saute et $V(x,\dot x)$ est discontinue le long des trajectoires. Les jets sont naturels pour des incertitudes constantes ou à variation bornée (cf. la distinction Popov / critère du cercle, et les fonctions de Lyapunov dépendant du paramètre à taux borné).
+\end{itemize}
+
+\section{Définitions}
+
+\subsection{Jets admissibles et fonctions de Lyapunov sur les jets}
+On se donne un système $\Sigma$ décrit par un ensemble $\mathcal S$ de solutions $x:[0,\infty)\to\R^n$, chacune de classe $C^{k+1}$ (cela couvre $\dot x=f(x)$, $\dot x = f(x,w)$ avec $w$ constant ou $C^{k}$ à taux borné, les systèmes de Lur'e avec $\phi\in C^k$, etc.).
+
+\begin{definition}[jets admissibles]
+L'ensemble des $k$-jets admissibles de $\Sigma$ est
+\[
+\Jet^k_\Sigma := \big\{\jet{k}{x}(t) \ :\ x\in\mathcal S,\ t\ge 0\big\}\subset \R^{n(k+1)}.
+\]
+On note $\sigma:\R^{n(k+2)}\to\R^{n(k+1)}$ le \emph{décalage} $\sigma(x_0,\dots,x_{k+1}) = (x_1,\dots,x_{k+1})$, de sorte que $\frac{d}{dt}\jet{k}{x} = \sigma(\jet{k+1}{x})$.
+\end{definition}
+
+\begin{definition}[fonction de Lyapunov sur les $k$-jets]\label{def:jetLF}
+$V:\R^{n(k+1)}\to\R$, de classe $C^1$, est une fonction de Lyapunov sur les $k$-jets de $\Sigma$ s'il existe $\alpha_1,\alpha_2,\alpha_3\in\mathcal K_\infty$ telles que, pour tout $j=(x_0,\dots,x_k)\in\Jet^k_\Sigma$ et tout $j^+=(x_0,\dots,x_{k+1})\in\Jet^{k+1}_\Sigma$,
+\begin{align}
+\alpha_1(|x_0|)\ \le\ V(j)\ &\le\ \alpha_2(|x_0|), \label{eq:pos}\\
+DV(x_0,\dots,x_k)\,[x_1,\dots,x_{k+1}]\ &\le\ -\alpha_3(|x_0|). \label{eq:dec}
+\end{align}
+\end{definition}
+Le point important est que \eqref{eq:pos} et \eqref{eq:dec} ne sont exigées que \emph{sur les jets admissibles}, pas sur tout $\R^{n(k+1)}$. Le membre de gauche de \eqref{eq:dec} est exactement $\frac{d}{dt}V(\jet{k}{x}(t))$ ; il ne dépend que du $(k+1)$-jet. Sous ces hypothèses, $t\mapsto V(\jet{k}{x}(t))$ décroît et est comparable à $|x(t)|$ : l'origine est uniformément asymptotiquement stable (globalement si les $\alpha_i$ sont $\mathcal K_\infty$). Le cas quadratique correspond à $V(j) = j\tr\mathcal P j$, $\mathcal P$ symétrique, non nécessairement définie positive sur tout l'espace.
+
+\subsection{Traduction LMI}
+Lorsque $\Jet^{k+1}_\Sigma$ est contenu dans un ensemble décrit par des contraintes d'égalité $\mathcal N(w)\, j^+ = 0$ (par ex. $x_{i+1} = A(w)x_i$) et des contraintes quadratiques $j^{+\top} \Theta_\ell\, j^+\ge 0$ (secteurs, pentes), on obtient une condition suffisante par Finsler et S-procédure :
+\begin{equation}\label{eq:LMI}
+\mathcal D(\mathcal P) + \He\big(G\,\mathcal N(w)\big) + \sum_\ell \lambda_\ell\Theta_\ell \prec 0,\qquad \lambda_\ell\ge 0,
+\end{equation}
+où $\mathcal D(\mathcal P)$ est la forme quadratique $j^+\mapsto DV(j)[\sigma(j^+)]$ et $\He(M)=M+M\tr$. Deux remarques structurelles :
+\begin{itemize}[nosep]
+\item Si $\mathcal N$ est affine en $w$ et si $G$ est \emph{constant}, \eqref{eq:LMI} est affine en $w$ : pour $w$ dans un polytope, il suffit de tester les sommets. L'exactitude de cette relaxation avec multiplicateur constant est une des questions centrales (\S\ref{sec:Q1}).
+\item Lorsque les contraintes exactes ne sont pas quadratiques (par ex. dérivées secondes d'une non-linéarité de secteur), on retrouve des incertitudes paramétriques sur le jet, et donc des hiérarchies polynomiales (Pólya, SOS).
+\end{itemize}
+
+\section{Le cas linéaire : une forme universelle et un résultat converse}\label{sec:LTI}
+
+\subsection{Le langage des formes différentielles quadratiques}
+Pour $\Sigma:\ \dot x = Ax$, une forme quadratique en le $N$-jet s'écrit
+\[
+V(\jet{N}{x}) = \sum_{i,j\le N} (x^{(i)})\tr \Phi_{ij}\, x^{(j)} =: Q_\Phi(x),\qquad \Phi(\zeta,\eta) := \sum_{i,j\le N}\Phi_{ij}\zeta^i\eta^j.
+\]
+C'est exactement une \emph{forme différentielle quadratique} (QDF) au sens de Willems et Trentelman \cite{WT98}, et leur calcul à deux variables s'applique : $\frac{d}{dt}Q_\Phi = Q_\Psi$ avec $\Psi(\zeta,\eta) = (\zeta+\eta)\Phi(\zeta,\eta)$. Pour un comportement linéaire autonome, ils établissent que la stabilité asymptotique équivaut à l'existence d'une QDF $Q_\Phi\ge0$ dont la dérivée est définie négative sur le comportement. La théorie linéaire des fonctions de Lyapunov sur les jets est donc, pour un seul système, déjà écrite dans ce langage ; la nouveauté est le cas \emph{incertain} (une QDF commune à une famille de comportements) et, comme on va le voir, le passage à des $\Phi$ entières non polynomiales (jets d'ordre infini) puis leur troncature.
+
+\subsection{La forme universelle $V_{T,N}$}
+Pour une courbe $x(\cdot)$ de classe $C^{N+1}$, on note $\tau_N(s;\jet{N}{x}(t))$ le polynôme de Taylor d'ordre $N$ de la trajectoire future :
+\begin{equation}\label{eq:taylor}
+\tau_N(s) := \sum_{k=0}^N \frac{s^k}{k!}\,x^{(k)}(t)\ \approx\ x(t+s).
+\end{equation}
+\begin{definition}[forme universelle]
+Pour $T>0$ et $N\in\N$, on pose
+\begin{equation}\label{eq:VTN}
+V_{T,N}(\jet{N}{x}) := \int_0^T |\tau_N(s)|^2\,ds = \sum_{i,j\le N} h_{ij}(T)\,(x^{(i)})\tr x^{(j)},\qquad h_{ij}(T) = \frac{T^{i+j+1}}{(i+j+1)\,i!\,j!}.
+\end{equation}
+\end{definition}
+Autrement dit, $V_{T,N}(j) = j\tr (H_{T,N}\otimes I_n) j$ avec $H_{T,N} = (h_{ij})$ : c'est la matrice de Gram des monômes $s^k/k!$ dans $L^2[0,T]$, donc $H_{T,N}\succ 0$ et $V_{T,N}$ est définie positive \emph{sur tout l'espace des jets}. Les coefficients ne dépendent pas du système. C'est une troncature du coût à horizon fini $\int_0^T|x(t+s)|^2ds$ : le jet encode la prédiction locale de la trajectoire, et $V_{T,N}$ est le coût de cette prédiction.
+
+\begin{lemma}[formule de dérivation]\label{lem:dV}
+Pour toute courbe $x(\cdot)$ de classe $C^{N+1}$,
+\begin{equation}\label{eq:dVTN}
+\frac{d}{dt}V_{T,N}(\jet{N}{x}(t)) = |\tau_N(T)|^2 - |x(t)|^2 + \frac{2}{N!}\int_0^T s^N\,\tau_N(s)\tr x^{(N+1)}(t)\,ds .
+\end{equation}
+\end{lemma}
+\begin{proof}
+En dérivant \eqref{eq:taylor} par rapport à $t$ : $\frac{d}{dt}\tau_N(s) = \sum_{k\le N}\frac{s^k}{k!}x^{(k+1)} = \partial_s\tau_N(s) + \frac{s^N}{N!}x^{(N+1)}$. Donc
+\[\frac{d}{dt}\int_0^T|\tau_N|^2 = \int_0^T\partial_s|\tau_N(s)|^2ds + \frac{2}{N!}\int_0^T s^N\tau_N\tr x^{(N+1)}ds,\] et $\tau_N(0) = x(t)$, $\tau_N(T)$ étant évalué en $s=T$.
+\end{proof}
+La formule \eqref{eq:dVTN} a la structure attendue :
+\[\dot V = -|x|^2 + (\text{prédiction à l'horizon }T)^2 + (\text{erreur de troncature}).\]
+Elle est \emph{indépendante du système} ; celui-ci n'intervient que par les jets admissibles.
+
+\subsection{Le théorème converse}
+\begin{lemma}[stabilité exponentielle uniforme]\label{lem:unif}
+Soit $\mathcal K\subset\R^{n\times n}$ compact, formé de matrices Hurwitz. Il existe $c\ge1$, $\lambda>0$ tels que $\|e^{At}\|\le c\,e^{-\lambda t}$ pour tout $A\in\mathcal K$, $t\ge 0$.
+\end{lemma}
+\begin{proof}
+L'application $A\mapsto P(A)$, solution de $A\tr P + PA = -I$, est continue sur l'ouvert des matrices Hurwitz. Sur $\mathcal K$, $0<p_1\le \lambda_{\min}(P(A))\le\lambda_{\max}(P(A))\le p_2$. Alors $\frac{d}{dt}(x\tr P x) = -|x|^2\le -\frac{1}{p_2}x\tr Px$, d'où $|e^{At}x|^2\le \frac{p_2}{p_1}e^{-t/p_2}|x|^2$.
+\end{proof}
+
+\begin{theorem}[converse, LTI incertain]\label{thm:LTI}
+Soit $\mathcal K\subset\R^{n\times n}$ un compact de matrices Hurwitz. Il existe $T>0$ et $N\in\N$ tels que, pour tout $A\in\mathcal K$, la forme universelle $V_{T,N}$ soit une fonction de Lyapunov sur les $N$-jets de $\dot x = Ax$ : il existe $\varepsilon>0$ tel que pour tout $A\in\mathcal K$ et tout $x\in\R^n$,
+\[
+V_{T,N}(\Gamma_N(A)x)\ \ge\ \varepsilon|x|^2,\qquad
+\frac{d}{dt}V_{T,N}\big(\jet{N}{x}\big)\Big|_{\dot x = Ax}\ \le\ -\tfrac14|x|^2,
+\]
+où $\Gamma_N(A) = \col(I,A,\dots,A^N)$.
+\end{theorem}
+\begin{proof}
+Le long de $\dot x = Ax$, $x^{(k)} = A^kx$, donc $\tau_N(s) = E_N(sA)x$ avec $E_N(M) = \sum_{k\le N}M^k/k!$, et $x^{(N+1)} = A^{N+1}x$. La formule \eqref{eq:dVTN} donne $\dot V_{T,N} = x\tr M_{T,N}(A)x$ avec
+\[
+M_{T,N}(A) = E_N(TA)\tr E_N(TA) - I + \frac{2}{N!}\,\sym\Big(\int_0^T s^N E_N(sA)\tr ds\ A^{N+1}\Big).
+\]
+Soit $a = \max_{\mathcal K}\|A\|$. On a $\|E_N(sA)\|\le e^{sa}$, $\|E_N(TA) - e^{TA}\|\le \sum_{k>N}(Ta)^k/k!\to 0$ et $\big\|\frac{1}{N!}\int_0^Ts^NE_N(sA)\tr ds\,A^{N+1}\big\|\le e^{Ta}\frac{(Ta)^{N+1}}{(N+1)!}\to0$, uniformément sur $\mathcal K$. Donc $M_{T,N}(A)\to e^{TA\tr}e^{TA}-I$ uniformément sur $\mathcal K$ quand $N\to\infty$. Par le lemme~\ref{lem:unif}, $e^{TA\tr}e^{TA}-I\preceq -(1-c^2e^{-2\lambda T})I$. On choisit $T$ tel que $c^2e^{-2\lambda T}\le\frac12$, puis $N$ tel que l'erreur uniforme soit $\le\frac14$.
+
+Pour la positivité : $V_{T,N}(\Gamma_N(A)x) = \int_0^T|E_N(sA)x|^2ds\to\int_0^T|e^{sA}x|^2ds\ge\int_0^Te^{-2as}ds\,|x|^2$ uniformément, puisque $|e^{sA}x|\ge e^{-as}|x|$. Quitte à augmenter $N$, on prend $\varepsilon = \frac12\int_0^Te^{-2as}ds$.
+\end{proof}
+
+\begin{remark}[interprétation]
+$V_{T,N}$ est la troncature de $V_T(x) = \int_0^T|x(t+s)|^2ds = x\tr P_T(A)x$, $P_T(A) = \int_0^Te^{A\tr s}e^{As}ds$, dont on sait que $A\tr P_T + P_TA = e^{A\tr T}e^{AT}-I$. Dans le calcul à deux variables, $\Phi_T(\zeta,\eta) = \int_0^Te^{s(\zeta+\eta)}ds = \frac{e^{T(\zeta+\eta)}-1}{\zeta+\eta}$ et $(\zeta+\eta)\Phi_T = e^{T(\zeta+\eta)}-1$ : la forme entière (jet d'ordre infini) a une dérivée qui est exactement $|x(t+T)|^2-|x(t)|^2$, et $V_{T,N}$ est sa troncature. Le théorème dit que \textbf{la troncature d'une fonction de Lyapunov universelle d'ordre infini reste une fonction de Lyapunov commune, dès que l'ordre est assez grand}. Ceci relie le cadre à l'approche par « dérivées d'ordre supérieur de l'état » d'Ebihara, Peaucelle, Arzelier et Hagiwara \cite{EPAH}.
+\end{remark}
+
+\begin{remark}[le paramètre $T$ n'est pas anodin]
+Le choix de $T$ est un compromis : $T$ grand garantit la contraction $c^2e^{-2\lambda T}<1$ mais dégrade l'erreur de troncature $(Ta)^{N+1}/(N+1)!$. On peut aussi remplacer $|\cdot|$ par une norme pondérée $|\cdot|_Q$ dans \eqref{eq:VTN} ; toute forme $\int_0^T\tau_N(s)\tr Q(s)\tau_N(s)ds$, ou plus généralement $\iint\tau_N(s)\tr K(s,s')\tau_N(s')\,ds\,ds'$, reste une forme quadratique en le jet. En fait \emph{toute} forme quadratique en le $N$-jet s'écrit ainsi pour un noyau $K$ distributionnel adapté ; la sous-classe des noyaux réguliers portés par $[0,T]^2$ est celle des formes « prédictives ».
+\end{remark}
+
+\begin{remark}[conditionnement]
+$H_{T,N} = T\,D\,\mathcal H_{N+1}\,D$ avec $D=\operatorname{diag}(T^i/i!)$ et $\mathcal H_{N+1}$ la matrice de Hilbert : le conditionnement explose ($\approx 10^{7}$ pour $N=4$, $10^{18}$ pour $N=8$ à $T=1$). Numériquement, il faut développer $\tau_N$ sur une base orthogonale de $L^2[0,T]$ (Legendre déplacés) : $\tau_N(s) = \sum_k\ell_k(s)z_k$ avec $z = Mj$, et alors $V_{T,N} = \sum_k|z_k|^2$. C'est exactement le changement de base des hiérarchies de Bessel–Legendre de Seuret et Gouaisbaut pour les systèmes à retard \cite{SG,BSG}, avec une différence conceptuelle intéressante : là-bas la fenêtre projetée est le \emph{passé} de l'état, ici c'est la \emph{prédiction du futur} à partir du jet présent.
+\end{remark}
+
+\subsection{Exemple numérique}
+Prenons $A_1 = \begin{pmatrix}-1&-1\\1&-1\end{pmatrix}$, $A_2 = \begin{pmatrix}-1&-8\\1/8&-1\end{pmatrix}$ et $\mathcal K = \co\{A_1,A_2\}$ (toutes les matrices du segment sont Hurwitz). D'après le critère de Shorten–Narendra pour $n=2$, il n'existe pas de fonction de Lyapunov quadratique commune, car $A_1A_2$ a des valeurs propres réelles négatives ($\approx-0{,}74$ et $-5{,}38$) : le niveau $N=0$ échoue. Au niveau $N=1$ avec $T=1$,
+\[
+V_{1,1}(x,\dot x) = |x|^2 + x\tr\dot x + \tfrac13|\dot x|^2
+\]
+vérifie, sur une grille de $2001$ points du segment, $\lambda_{\max}\big(\sym(A\tr P_{1,1}(A)+P_{1,1}(A)A)\big)\le -9{,}3\cdot10^{-2}$ et $\lambda_{\min}(P_{1,1}(A))\ge 0{,}26$, où $P_{T,N}(A) = \Gamma_N(A)\tr(H_{T,N}\otimes I)\Gamma_N(A)$. La forme d'ordre $1$ fonctionne pour $T\in[0{,}9;\,1{,}1]$ environ ; pour $T=1{,}5$ il faut $N=4$, pour $T=2$ il faut $N=7$, ce qui illustre le compromis sur $T$. (Il serait bon de comparer avec le niveau $N=1$ de la hiérarchie LMI à $\mathcal P$ libre, qui doit faire au moins aussi bien.)
+
+\subsection{Hiérarchie LMI et exactitude asymptotique}\label{sec:hierarchie}
+Pour $\mathcal K = \co\{A_1,\dots,A_m\}$, notons $A(\alpha) = \sum\alpha_iA_i$, $\alpha$ dans le simplexe $\Delta$. La condition de décroissance d'une forme $V(j) = j\tr\mathcal Pj$ s'écrit
+\begin{equation}\label{eq:robcond}
+\Gamma_{N+1}(A(\alpha))\tr\,\mathcal D(\mathcal P)\,\Gamma_{N+1}(A(\alpha))\ \prec\ 0\qquad\forall\alpha\in\Delta,
+\end{equation}
+matrice polynomiale en $\alpha$ de degré $2(N+1)$. Deux relaxations :
+\begin{enumerate}[nosep,label=(\alph*)]
+\item \textbf{Pólya.} Homogénéiser \eqref{eq:robcond}, multiplier par $(\sum\alpha_i)^d$ et exiger la négativité de tous les coefficients (version matricielle du théorème de Pólya, cf. \cite{Scherer,OP}). Pour $N$ fixé, la relaxation converge en $d$ ; le théorème~\ref{thm:LTI} garantit que le niveau $N$ est réalisable pour $N$ assez grand (avec $\mathcal P = H_{T,N}\otimes I$ ou tout $\mathcal P$ libre). La hiérarchie $(N,d)$ est donc \textbf{asymptotiquement exacte}.
+\item \textbf{Finsler à multiplicateur polynomial en $\alpha$.} Même conclusion en autorisant $G(\alpha)$ polynomial.
+\end{enumerate}
+La question ouverte est celle du multiplicateur \emph{constant} (\S\ref{sec:Q1}).
+
+\begin{remark}[analogie discrète]
+En temps discret, $x^+ = Ax$, l'analogue du jet est la fenêtre $(x_t,\dots,x_{t+N})$ et $V=\sum_{i\le N}|x_{t+i}|^2$ donne $V_{t+1}-V_t = |x_{t+N+1}|^2-|x_t|^2$ : la condition robuste est $\|A^{N+1}\|<1$ sur $\mathcal K$ (constant) ou $\|A_{N+1}\cdots A_1\|<1$ (commutation arbitraire). Cette dernière est le critère classique dont l'exactitude asymptotique pour le rayon spectral joint est connue \cite{AJPR}. Le temps discret est donc un bon guide pour deviner ce qui est vrai en continu.
+\end{remark}
+
+\section{Systèmes incertains : paramètres constants, à taux borné, Lur'e}
+
+\subsection{Paramètres constants : jets et fonctions dépendant du paramètre}
+Soit $\dot x = f(x,w)$, $w\in W$ compact, constant. Notons $\Phi_k(x,w)$ le $k$-jet \eqref{eq:Phi} du système figé en $w$, et $\Jet^k = \Phi_k(\R^n\times W)$.
+
+\begin{proposition}[lien avec les fonctions de Lyapunov dépendant du paramètre]\label{prop:PDLF}
+\begin{enumerate}[nosep,label=(\roman*)]
+\item Si $V$ est une fonction de Lyapunov sur les $k$-jets, alors $W_w := V\circ\Phi_k(\cdot,w)$ est une famille de fonctions de Lyapunov dépendant du paramètre.
+\item Réciproquement, soit $(W_w)_{w\in W}$ une famille de fonctions de Lyapunov, continue en $(x,w)$. Elle provient d'une fonction sur les $k$-jets si et seulement si elle est \emph{constante sur les fibres} : $\Phi_k(x,w) = \Phi_k(x,w')\Rightarrow W_w(x) = W_{w'}(x)$. En particulier, si le $k$-jet \emph{identifie} le paramètre ($w\mapsto\Phi_k(x,w)$ injective pour $x\neq0$), toute famille continue provient d'une fonction sur les jets (continue sur $\Jet^k$, à prolonger).
+\end{enumerate}
+\end{proposition}
+La preuve de (ii) est immédiate : on pose $V(j) := W_{w}(x_0)$ pour $j = \Phi_k(x_0,w)$, ce qui est bien défini par constance sur les fibres. Ce qui reste à faire est la question de régularité (prolonger $V$ hors de $\Jet^k$ de façon $C^1$, ce qui est un problème d'extension type Whitney) et, surtout, celle de la \textbf{classe} : quand $W_w = x\tr P(w)x$ et $f = A(w)x$, la condition $x\tr P(w)x = j\tr\mathcal Pj$ impose $P(w) = \Gamma_N(A(w))\tr\mathcal P\Gamma_N(A(w))$, c'est-à-dire $P(w)\in\operatorname{span}\{A(w)^{\top i}A(w)^j\}_{i,j\le N}$. Le théorème~\ref{thm:LTI} affirme qu'asymptotiquement en $N$ cet espace contient toujours une fonction de Lyapunov robuste.
+
+\subsection{Paramètres à taux borné : une interpolation}
+Soit $\dot x = A(w)x$, $w(t)\in W$, $|\dot w|\le\delta$. Le $2$-jet devient $(x,\ A(w)x,\ A(w)^2x + \partial_wA(w)[\dot w]\,x)$ : le taux $\dot w$ apparaît comme une incertitude supplémentaire sur le jet, bornée par $\delta$. Pour $V(x,\dot x)$,
+\[
+\dot V = \dot V\big|_{\dot w=0} + 2\,\partial_{\dot x}V(x,\dot x)\tr\,\partial_wA(w)[\dot w]\,x,
+\]
+et la condition LMI est celle des fonctions dépendant du paramètre à taux borné \cite{GAC}, avec ici $P(w) = \Gamma_1(A(w))\tr\mathcal P\Gamma_1(A(w))$ quadratique en $A(w)$. Lorsque $\delta\to\infty$, la condition force $\partial_{\dot x}V\cdot\partial_wA[\nu]x=0$ pour tout $\nu$ : si $\partial_wA$ est assez riche, $V$ ne peut plus dépendre de $\dot x$ et on retombe sur l'ordre $0$, c'est-à-dire la stabilité quadratique, qui est bien ce qu'exigent les variations arbitrairement rapides. \textbf{L'ordre du jet interpole entre paramètre constant (tout ordre) et paramètre arbitrairement variable (ordre $0$).}
+
+\begin{question}[converse à taux borné]\label{q:rate}
+Soit $\dot x = A(w)x$ robustement exponentiellement stable pour tout $w(\cdot)$ à valeurs dans $W$ et $|\dot w|\le\delta_0$. Existe-t-il $N$ et une forme quadratique en le $N$-jet qui soit fonction de Lyapunov pour tout $\delta<\delta_0$ (ou seulement pour $\delta$ assez petit) ?
+\end{question}
+\noindent\emph{Démarche proposée.} Appliquer la construction universelle au système \emph{figé} : $\tau_N$ est calculé avec $w$ gelé à l'instant $t$. La formule \eqref{eq:dVTN} reste valable, mais $x^{(k)}$ contient maintenant des termes en $\dot w,\ddot w,\dots$ ; on peut ne borner que $\dot w$ en réécrivant $x^{(k)}$ à l'aide de la dérivée totale de $A(w(t))$ et en majorant les termes en $\dot w$ par $\delta\cdot C(N,T)$. On obtient alors un résultat du type : pour tout $\delta<\delta(N,T)$ explicite, $V_{T,N}$ convient. La réciproque à $\delta_0$ donné est plus délicate car la stabilité à taux borné n'implique pas la stabilité du système figé avec la même marge ; il faudra sans doute utiliser la fonction $W(x,w)$ fournie par un théorème converse pour les systèmes à taux borné et procéder par identifiabilité (proposition~\ref{prop:PDLF}). La version $\delta$ petit est en revanche à portée immédiate et constituerait un premier résultat.
+
+\subsection{Lur'e à pente bornée : réduction à un LPV}
+Soit $\dot x = Ax + Bw$, $y=Cx\in\R$, $w = -\phi(y)$, avec $\phi\in C^1$, $\phi(0)=0$, $0\le\phi(y)y\le\mu y^2$ (secteur) et $0\le\phi'\le\mu'$ (pente). Alors $\dot w = -\phi'(y)\dot y$ et
+\begin{equation}\label{eq:LPV}
+\frac{d}{dt}\begin{pmatrix}x\\w\end{pmatrix} = \begin{pmatrix}A&B\\-sCA&-sCB\end{pmatrix}\begin{pmatrix}x\\w\end{pmatrix},\qquad s(t) = \phi'(y(t))\in[0,\mu'],
+\end{equation}
+avec en plus la contrainte d'état $-w(\mu y+w)\ge 0$ (secteur). C'est un système LPV en $s$, à trajectoires confinées au graphe de $-\phi$. Sur les jets :
+\begin{itemize}[nosep]
+\item la contrainte de pente est \emph{quadratique} en le $1$-jet : $-\dot w(\mu'\dot y+\dot w)\ge 0$ ;
+\item une forme $V(x,\dot x)$ est, via $\dot x = Ax+Bw$, une forme quadratique en $(x,w) = (x,\phi(y))$ ; ce sont les fonctions « quadratiques en $(x,\phi)$ » utilisées pour les non-linéarités à pente bornée \cite{VDD} ;
+\item si $\phi\in C^2$ avec $|\phi''|\le\mu_2$, alors $\dot s = \phi''(y)\dot y$ : le paramètre $s$ est à taux borné, avec une borne \emph{dépendant de l'état} ($|\dot s|\le\mu_2|\dot y|$). Les contraintes sur le $2$-jet ne sont plus quadratiques mais paramétrées polynomialement par $(s,r) = (\phi',\phi'')$ dans une boîte : on retombe sur des hiérarchies de type Pólya/SOS, ou sur le cadre à taux borné de la section précédente.
+\end{itemize}
+Le cas Lur'e à pente bornée est donc un cas particulier du cadre LPV à paramètre à taux borné, et la question~\ref{q:rate} s'y applique. Une réciproque « propre » devrait dire : \emph{si le système de Lur'e est absolument stable pour la classe $\{\phi\in C^k : \phi^{(i)}\in[\underline\mu_i,\overline\mu_i]\}$, alors il existe une fonction de Lyapunov quadratique en le $k$-jet}. Il faut être prudent : l'absolue stabilité pour une classe de $\phi$ n'est pas la stabilité de chaque système gelé, et le contre-exemple de Molchanov–Pyatnitskii rappelle que sans borne de pente les formes quadratiques en $x$ ne suffisent pas.
+
+\begin{remark}[Popov]
+La fonction de Popov $x\tr Px + 2\eta\int_0^y\phi$ n'est pas une forme quadratique en le jet, mais sa dérivée $\frac{d}{dt}\int_0^y\phi = \phi(y)\dot y = -w\,C\dot x$ en est une. Cela suggère une notion élargie : une \emph{inégalité de dissipation sur les jets}, où seule $\dot V$ doit être certifiable par S-procédure sur les jets. Conjecture à examiner : la hiérarchie des jets est duale, dans le domaine temporel, de la hiérarchie des multiplicateurs dynamiques (Popov, Zames–Falb d'ordre fini, \cite{CHT}), l'ordre du jet correspondant à l'ordre du multiplicateur. Une réciproque se heurterait alors à la question, connue et difficile, de la complétude de ces multiplicateurs.
+\end{remark}
+
+\section{Le cas non linéaire}
+
+\subsection{Un résultat semi-global sous hypothèse d'analyticité}
+On considère $\dot x = f(x)$, $f$ analytique réelle, l'origine exponentiellement stable sur un compact $C$ positivement invariant : $|X(t;x)|\le ce^{-\lambda t}|x|$ pour $x\in C$. Ici $L_f^kx$ remplace $A^kx$, et $\tau_N(s;x) = \sum_{k\le N}\frac{s^k}{k!}L_f^kx$ est la troncature de la \emph{série de Lie} $X(s;x) = \sum_k\frac{s^k}{k!}L_f^kx$, dont le rayon de convergence est fini en général.
+
+\smallskip
+\noindent\textbf{Hypothèse $(\mathrm H_r)$.} Il existe $r>0$ et $M$ tels que $\frac{|L_f^kx|}{k!}\le\frac{M}{r^k}$ pour tout $x\in C$, $k\in\N$ (c'est le cas si $f$ s'étend holomorphiquement à un voisinage complexe uniforme de $C$, par les estimations de Cauchy sur le flot complexe).
+
+\begin{theorem}[converse non linéaire, semi-global]\label{thm:NL}
+Sous $(\mathrm H_r)$, si $T<r$ et $c^2e^{-2\lambda T}<1$, alors il existe $N$ tel que $x\mapsto V_{T,N}(\Phi_N(x))$ soit une fonction de Lyapunov (stricte, à croissance quadratique) sur $C$.
+\end{theorem}
+\begin{proof}[Esquisse]
+On applique le lemme~\ref{lem:dV} avec $x^{(k)} = L_f^kx$. Sous $(\mathrm H_r)$ et $T<r$, $\tau_N(T;x)\to X(T;x)$ uniformément sur $C$, et le terme d'erreur est majoré par
+\[\frac{2T}{N!}\sup_{s\le T}s^N|\tau_N(s)|\,|L_f^{N+1}x|\ \le\ 2TM'(N+1)\frac{T^N}{r^{N+1}}\ \to\ 0 .\] Donc $\dot V\to |X(T;x)|^2-|x|^2\le-(1-c^2e^{-2\lambda T})|x|^2$. La positivité suit de $\int_0^T|X(s;x)|^2ds\ge\int_0^Te^{-2Ls}ds\,|x|^2$, $L$ constante de Lipschitz de $f$ sur $C$.
+\end{proof}
+
+\begin{remark}
+La condition $\frac{\ln c}{\lambda}<r$ met en balance le \textbf{temps de dépassement} (au bout duquel la norme a décru) et le \textbf{rayon d'analyticité en temps}. Pour un $f$ polynomial de degré $\ge2$, le rayon $r$ décroît comme $|x|^{1-d}$ sur les grands compacts, alors que le dépassement peut être arbitraire : le théorème est donc semi-global au sens faible (il ne couvre pas tout compact). Localement, $c$ peut être rendu proche de $1$ par une norme pondérée $|\cdot|_Q$ issue de la linéarisation, et alors tout $T$ convient : on retrouve que $N=0$ suffit localement.
+\end{remark}
+
+\subsection{La question ouverte et des démarches}
+\begin{question}[au-delà du rayon d'analyticité]\label{q:NL}
+Soit $f$ analytique, exponentiellement stable sur $C$ compact invariant. Existe-t-il toujours $N$ et $\mathcal P$ tels que $\sum_{i,j\le N}(L_f^ix)\tr P_{ij}L_f^jx$ soit une fonction de Lyapunov sur $C$ ? Autrement dit, la réunion des classes $\mathcal Q_N(f)$ de \eqref{eq:classe} contient-elle toujours une fonction de Lyapunov ?
+\end{question}
+\noindent\emph{Démarches.}
+\begin{enumerate}[nosep,label=(\alph*)]
+\item \textbf{Noyaux généraux.} Remplacer $\int_0^T|\tau_N|^2$ par $\iint\tau_N(s)\tr K(s,s')\tau_N(s')$ avec $K$ à support dans $[0,T]^2$, $T<r$, et se demander si un noyau peut compenser un dépassement : l'obstacle est que $\dot V$ fait toujours apparaître un terme de bord $\tau_N(T)\tr K(T,\cdot)$, et que le contrôle sur $[0,T]$ seul ne « voit » pas la décroissance ultérieure. Je conjecture une réponse négative pour les noyaux réguliers, ce qui ramènerait au problème algébrique suivant.
+\item \textbf{Exploration numérique du span.} Prendre un système polynomial plan avec grand dépassement, calculer symboliquement $L_f^kx$, et chercher par SOS une fonction de Lyapunov dans $\mathcal Q_N(f)$ sur une région ; observer si la faisabilité s'améliore avec $N$ ou stagne. Un cas où elle stagne serait un contre-exemple à la question, un cas où elle s'améliore un indice pour un mécanisme de preuve différent de Taylor.
+\item \textbf{Koopman–Krylov.} $\mathcal Q_N(f)$ est le carré du sous-espace de Krylov $\mathcal K_N = \operatorname{span}\{L_f^ix\}$ du générateur de Koopman. Les fonctions de Lyapunov de Mauroy–Mezić \cite{MM} sont construites sur les fonctions propres ; la question devient : les approximations de Krylov des fonctions propres (ou de $\int_0^\infty|X(s;x)|^2ds$) convergent-elles dans un sens suffisant ? C'est l'analogue de la convergence des méthodes de Krylov pour $e^{tA}$, dont on connaît la dépendance en le spectre et en la non-normalité : on peut s'attendre à ce que le dépassement (non-normalité) soit précisément l'obstruction.
+\item \textbf{Fonctions polynomiales.} Peet et Papachristodoulou \cite{Peet} montrent l'existence de fonctions de Lyapunov polynomiales sur les compacts pour les systèmes exponentiellement stables ; comparer la structure de leur construction avec $\mathcal Q_N(f)$, pour voir si elle se réécrit en jets, éventuellement avec des formes de degré $>2$ en le jet.
+\end{enumerate}
+
+\subsection{Lien avec la contraction et Krasovskii}
+Si $V(x,\delta x)$ est une fonction de Finsler–Lyapunov \cite{FS,AJP} (métrique pour la contraction), alors, puisque $\delta x = f(x(t))$ est solution de l'équation variationnelle le long de toute trajectoire, $x\mapsto V(x,f(x)) = V(x,\dot x)$ est une fonction sur les $1$-jets, décroissante. La méthode de Krasovskii, $V = f\tr Pf$, en est le cas quadratique. Les théorèmes converses de la contraction fournissent donc des fonctions sur les $1$-jets, mais avec un poids $P(x)$ dépendant de l'état, donc hors de la classe quadratique en le jet. Deux remarques :
+\begin{itemize}[nosep]
+\item la contraction est plus forte que la stabilité exponentielle d'un équilibre ; les fonctions sur les $1$-jets qu'elle fournit sont « transverses » et pourraient éclairer le rôle de $\dot x$ dans $V(x,\dot x)$ ;
+\item on peut définir des jets d'ordre supérieur pour l'équation variationnelle ($\delta\dot x$, etc.) et se demander si une théorie « jets + contraction » redonne les métriques de Finsler par des formes quadratiques en des jets d'ordre plus élevé.
+\end{itemize}
+
+\section{Programme de travail}
+
+\subsection{Multiplicateurs constants (LTI polytopique)}\label{sec:Q1}
+\begin{question}\label{q:const}
+Pour $\mathcal K=\co\{A_i\}$ robustement Hurwitz, existe-t-il $N$, $\mathcal P$ et un multiplicateur \emph{constant} $G$ tels que
+$\mathcal D(\mathcal P) + \He(G\,\mathcal N(A_i))\prec 0$ pour tout sommet $i$, où $\mathcal N(A)j^+ = (x_{k+1}-Ax_k)_{k\le N}$ ?
+\end{question}
+C'est la question de l'exactitude asymptotique de la hiérarchie « dérivées d'ordre supérieur + variables de relaxation » de \cite{EPAH}. Démarches :
+\begin{enumerate}[nosep,label=(\alph*)]
+\item Le multiplicateur naturel se lit dans la preuve du théorème~\ref{thm:LTI} : la formule \eqref{eq:dVTN} exprime $\dot V$ comme somme d'un terme de bord et d'un terme de reste ; les contraintes $x_{k+1}=Ax_k$ n'y interviennent que pour identifier $\tau_N(T)$ avec $E_N(TA)x$. Écrire explicitement $G$ pour un $A$ fixé et regarder sa dépendance en $A$ ; si elle est polynomiale de degré borné indépendant de $N$, augmenter $N$ pourrait permettre de l'absorber.
+\item Utiliser la LMI duale d'Ebihara et al. pour extraire, en cas d'infaisabilité au niveau $N$, une matrice $A^\star\in\mathcal K$ « pire cas » et tester si elle est Hurwitz : cela donne un test d'exactitude par niveau, et des indications sur la croissance de $N$.
+\item Expérimenter sur l'exemple de \S\ref{sec:LTI} et sur des polytopes réputés difficiles (intervalles, familles de Barmish) pour $N=1,2,3$ ; comparer Pólya et multiplicateur constant à $N$ égal.
+\item Un argument de complexité (la stabilité des matrices d'intervalles est NP-difficile, Poljak–Rohn) suggère qu'aucun niveau fixe ne peut être exact ; il serait intéressant de quantifier la croissance nécessaire de $N$ en fonction de la marge de stabilité et de la taille du polytope, ce que la preuve du théorème~\ref{thm:LTI} permet ($N\sim Ta$, $T\sim\ln c/\lambda$).
+\end{enumerate}
+
+\subsection{Liste des questions et ordre de priorité}
+\begin{enumerate}[nosep]
+\item \textbf{Rédiger et solidifier} le théorème~\ref{thm:LTI} (fait ci-dessus), le théorème~\ref{thm:NL}, et la version discrète ; ajouter la version $|\cdot|_Q$ pondérée, les versions performance ($H_2$, $H_\infty$ : remplacer $|x|^2$ par un coût $|z|^2-\gamma^2|d|^2$, la formule \eqref{eq:dVTN} devient une inégalité de dissipation sur les jets).
+\item \textbf{Taux borné, $\delta$ petit} (question~\ref{q:rate}, version facile) : premier résultat converse non trivial hors LTI, avec borne explicite $\delta(N,T)$.
+\item \textbf{Multiplicateur constant} (question~\ref{q:const}) : question LMI la plus utile en pratique.
+\item \textbf{Lur'e à pente bornée} via la réduction LPV \eqref{eq:LPV} : converse pour la classe $C^1$ à pente bornée, puis $C^2$ ; comparer aux multiplicateurs de Zames–Falb d'ordre fini.
+\item \textbf{Non linéaire au-delà du rayon d'analyticité} (question~\ref{q:NL}) : exploration numérique d'abord, puis Koopman–Krylov.
+\item \textbf{Inclusions et solutions non régulières} : que remplace le jet lorsque les solutions ne sont que absolument continues ? Piste : se restreindre aux sélections $C^k$ et étudier la densité ; ou définir des « jets ensemblistes » $\Jet^k_F(x)$ et une fonction $W(x) = \sup_{j\in\Jet^k_F(x)}V(j)$, en cherchant à quelles conditions $W$ est une fonction de Lyapunov usuelle.
+\item \textbf{Numérique} : base de Legendre pour conditionner $H_{T,N}$ ; implémentation de la hiérarchie sur des exemples de la littérature LAAS.
+\end{enumerate}
+
+\begin{thebibliography}{99}\small
+\bibitem{WT98} J.~C. Willems, H.~L. Trentelman, \emph{On quadratic differential forms}, SIAM J. Control Optim., 36(5), 1998.
+\bibitem{EPAH} Y. Ebihara, D. Peaucelle, D. Arzelier, T. Hagiwara, travaux sur l'analyse robuste via les dérivées d'ordre supérieur de l'état et les LMI duales (vers 2005–2009, IEEE TAC / CDC). À préciser.
+\bibitem{GAC} P. Gahinet, P. Apkarian, M. Chilali, \emph{Affine parameter-dependent Lyapunov functions and real parametric uncertainty}, IEEE TAC, 41(3), 1996.
+\bibitem{SG} A. Seuret, F. Gouaisbaut, \emph{Hierarchy of LMI conditions for the stability analysis of time-delay systems}, Systems \& Control Letters, 2015.
+\bibitem{BSG} M. Bajodek, A. Seuret, F. Gouaisbaut, résultats de nécessité pour la hiérarchie de Legendre (vers 2022–2023). À préciser.
+\bibitem{AJPR} A.~A. Ahmadi, R. Jungers, P. Parrilo, M. Roozbehani, \emph{Joint spectral radius and path-complete graph Lyapunov functions}, SIAM J. Control Optim., 2014.
+\bibitem{Scherer} C.~W. Scherer, \emph{Relaxations for robust linear matrix inequality problems with verifications for exactness}, SIAM J. Matrix Anal. Appl., 2005.
+\bibitem{OP} R.~C.~L.~F. Oliveira, P.~L.~D. Peres, \emph{Parameter-dependent LMIs in robust analysis: characterization of homogeneous polynomially parameter-dependent solutions via LMI relaxations}, IEEE TAC, 2007.
+\bibitem{VDD} G. Valmorbida, R. Drummond, S.~R. Duncan, travaux sur l'analyse des systèmes de Lur'e à pente bornée avec fonctions de Lyapunov quadratiques en $(x,\phi)$ (vers 2018). À préciser.
+\bibitem{CHT} J. Carrasco, W.~P. Heath, M.~C. Turner, et coauteurs, multiplicateurs de Zames–Falb (survey, European J. Control, 2016).
+\bibitem{MM} A. Mauroy, I. Mezić, \emph{Global stability analysis using the eigenfunctions of the Koopman operator}, IEEE TAC, 2016.
+\bibitem{Peet} M.~M. Peet, A. Papachristodoulou, \emph{A converse sum of squares Lyapunov result with a degree bound}, IEEE TAC, 2012 ; M.~M. Peet, \emph{Exponentially stable nonlinear systems have polynomial Lyapunov functions on bounded regions}, IEEE TAC, 2009.
+\bibitem{FS} F. Forni, R. Sepulchre, \emph{A differential Lyapunov framework for contraction analysis}, IEEE TAC, 2014.
+\bibitem{AJP} V. Andrieu, B. Jayawardhana, L. Praly, \emph{Transverse exponential stability and applications}, IEEE TAC, 2016.
+\end{thebibliography}
+
+\end{document}

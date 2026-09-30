@@ -1,0 +1,22 @@
+# LaTeX build files
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.spl
+*.nav
+*.snm
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+# Python
+__pycache__/
+*.pyc
+# experiment outputs
+*.png
+*.pkl
+*.npz
+experiments/**/*.txt
+!experiments/**/README*
