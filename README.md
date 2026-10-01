@@ -36,6 +36,14 @@ python3 experiments/quick_check.py          # one-minute sanity check
 cd experiments/polytope && python3 polytope_levels.py
 ```
 
+## Running the experiments in Google Colab
+
+`experiments/colab_demo.ipynb` clones the repository, installs the dependencies and reproduces the main tables and figures
+in a few minutes. Open it from Colab (File → Open notebook → GitHub; for a private repository, enable "Include private repos")
+and set the repository URL in the first cell. When the repository becomes public, the badge below opens it directly:
+
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/VOTRE-COMPTE/jets-lyapunov/blob/main/experiments/colab_demo.ipynb)
+
 ## Experiments
 
 Run each script from its own folder (some scripts load their neighbours by file name).
