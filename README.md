@@ -26,6 +26,16 @@ python3 -m venv .venv && source .venv/bin/activate   # optional
 pip install -r requirements.txt
 ```
 
+## Running the experiments online (GitHub Codespaces)
+
+On the GitHub page of the repository: **Code → Codespaces → Create codespace on main**. A VS Code session opens in the
+browser with Python and all dependencies installed (`.devcontainer/devcontainer.json`). Then, in its terminal:
+
+```
+python3 experiments/quick_check.py          # one-minute sanity check
+cd experiments/polytope && python3 polytope_levels.py
+```
+
 ## Experiments
 
 Run each script from its own folder (some scripts load their neighbours by file name).
