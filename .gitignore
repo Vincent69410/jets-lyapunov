@@ -20,3 +20,4 @@ __pycache__/
 *.npz
 experiments/**/*.txt
 !experiments/**/README*
+.DS_Store
