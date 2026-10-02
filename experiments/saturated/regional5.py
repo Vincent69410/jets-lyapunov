@@ -1,6 +1,9 @@
-import numpy as np, cvxpy as cp, itertools, time
+import numpy as np, cvxpy as cp, itertools, time, os
 exec(open('regional2.py').read().split('def feasible')[0])
-R0=np.load('regional3_res.npz')['PQ'][:2,:2]   # classical ellipsoid shape as reference
+# Reference shape for ref='ell' (classical ellipsoid, produced by regional3.py). Not needed for ref='ball'.
+R0=np.load('regional3_res.npz')['PQ'][:2,:2] if os.path.exists('regional3_res.npz') else np.eye(2)
+REFS=['ball','ell'] if os.path.exists('regional3_res.npz') else ['ball']
+RW=os.environ.get('RW','1.0')
 S2=np.zeros((3,3)); S2[:2,:2]=np.outer(k,k); S2[:2,2]=-u0*k; S2[2,:2]=-u0*k; S2[2,2]=u0**2   # (Kx-u0)^2
 def lin(hvec,h0):
     # z^T S z = (Kx-u0)*(h0 + h^T x)
@@ -50,7 +53,7 @@ def best(jet,ref,les=np.logspace(-2,2,9),mus=np.r_[0,np.logspace(-2,1.5,8)]):
         else: hi=mid
     return lo,Pbest
 t=time.time()
-for ref in ['ball','ell']:
+for ref in REFS:
     bJ,PJ=best(True,ref); bQ,PQ=best(False,ref)
     print("ref=%s  jet: beta=%.3f  quadratic: beta=%.3f  (%.0fs)"%(ref,bJ,bQ,time.time()-t))
-    np.savez('regional5_%s.npz'%ref,PJ=PJ,PQ=PQ,K=K)
+    np.savez('regional5_R%s_%s.npz'%(RW,ref),PJ=PJ,PQ=PQ,K=K)

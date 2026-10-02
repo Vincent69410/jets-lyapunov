@@ -1,9 +1,9 @@
-import os; os.environ['RW']='0.01'
+import os; RW=os.environ.setdefault('RW','0.01')
 import numpy as np
 exec(open('regional3.py').read().split('bJ,PJ=best_beta')[0])
 bC,PC=best_beta(False)      # classical: quadratic + generalized sector (T line search)
 print("classical generalized sector: beta=%.3f"%bC)
-d=np.load('regional5_R0.01_ball.npz'); PJ=d['PJ']; PQ=d['PQ']
+d=np.load('regional5_R%s_ball.npz'%RW); PJ=d['PJ']; PQ=d['PQ']
 from scipy.integrate import solve_ivp
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D

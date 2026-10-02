@@ -56,7 +56,7 @@ Run each script from its own folder (some scripts load their neighbours by file 
 | `polytope/search4.py SEED 3 3` | Section 9.2: random search for a polytope requiring level 2 (writes `exN2_*.npy`) |
 | `polytope/final_example.py`, `margins.py` | Section 9.2: validation of the example `example_N2_final.npy` and decrease margins γ* |
 | `saturated/regional5.py` (`RW=0.01`) | Section 9.3: region-wise LMIs of Proposition 26 (jet and quadratic certificates) |
-| `saturated/final_regional.py` | Figures 3 and 4 (needs `regional5_R0.01_ball.npz` from the previous script) |
+| `saturated/final_regional.py` | Figures 3 and 4 (needs the `.npz` file written by the previous script with the same `RW`) |
 | `saturated/recheck.py` | finer line search for the two values of β |
 | `pendulum/pendulum.py`, `grid_test.py` | damped pendulum: order-1 vs order-2 jets with local sector/slope/curvature bounds (Section 7, remark) |
 | `mathieu/accel.py`, `accel2.py ZETA EPS` | LPV with bounded parameter acceleration (Remark on Leibniz's formula) |
